@@ -4,6 +4,7 @@ import matplotlib.image as mpimg
 from scipy import signal
 from scipy import constants
 from scipy import io
+import sys
 import time
 import struct
 from subprocess import check_output
@@ -58,7 +59,8 @@ unpack_str="<"+str(n_ch*win)+"h"
 for pulse_counter in range(0,num_pulses):
     skip_val=int(offset_bytes/2/n_ch)+period*(pulse_counter)
     
-    ind_axe_start=skip_val+strange_shift
+    #ind_axe_start=skip_val+strange_shift
+	ind_axe_start=skip_val
     ind_axe_all=np.arange(ind_axe_start,ind_axe_start+win) # samples axe for 4000-window
         
     skip_str="--skip="+str(skip_val)
@@ -155,8 +157,14 @@ for w_ind in range(0,len(w_axe)):
     rw_amp_mat[w_ind,:]=np.mean(rwa_data,axis=1)
     gw_pha_mat[w_ind,:]=np.mean(gwp_data,axis=1)
     rw_pha_mat[w_ind,:]=np.mean(rwp_data,axis=1)
+    
+	#print(str(w_ind+1)+"/"+str(len(w_axe)))
+    sys.stdout.write("\r"+str(w_ind+1)+"/"+str(len(w_axe))) # The simpliest...
+    sys.stdout.flush()										# progressbar
+    
 
-    print(str(w_ind+1)+"/"+str(len(w_axe)))
+sys.stdout.write("\nComplete!\n")
+
 gw_pha_mat=np.unwrap(gw_pha_mat,axis=1)
 rw_pha_mat=np.unwrap(rw_pha_mat,axis=1)
 
