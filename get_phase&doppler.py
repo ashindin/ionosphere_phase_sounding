@@ -66,19 +66,24 @@ w_axe=np.concatenate((w_axe1,w_axe2), axis=0)
 #strange_shift=(-2*(offset_bytes/8+win)+period-del_rw+win) # strange time shift
 
 sos_coefs = signal.iirfilter(f_order, (2**.5)*2*l_c_freq/fd, btype='lowpass', analog=False, ftype='bessel', output='sos')
-sos_zi=np.zeros((2,2))
+#sos_zi=np.zeros((2,2))
+#gwcr_zf=np.zeros((2,2))
+#gwci_zf=np.zeros((2,2))
+rwcr_zf=np.zeros((2,2))
+rwci_zf=np.zeros((2,2))
 
 # Arrray initializations
-gwr_mat=np.zeros((num_pulses, win2))
-gwi_mat=np.zeros((num_pulses, win2))
+
+#gwr_mat=np.zeros((num_pulses, win2))
+#gwi_mat=np.zeros((num_pulses, win2))
 rwr_mat=np.zeros((num_pulses, win2))
 rwi_mat=np.zeros((num_pulses, win2))
-gw_ind_mat=np.zeros((num_pulses, win2))
+#gw_ind_mat=np.zeros((num_pulses, win2))
 rw_ind_mat=np.zeros((num_pulses, win2))
 
-gw_amp_mat=np.zeros((len(w_axe),num_pulses))
+#gw_amp_mat=np.zeros((len(w_axe),num_pulses))
 rw_amp_mat=np.zeros((len(w_axe),num_pulses))
-gw_pha_mat=np.zeros((len(w_axe),num_pulses))
+#gw_pha_mat=np.zeros((len(w_axe),num_pulses))
 rw_pha_mat=np.zeros((len(w_axe),num_pulses))
 
 #until_par="--until=+" + str(win)
@@ -138,33 +143,6 @@ for w_ind in range(0,len(w_axe)):
 	rwci_data=rwr_mat*np.imag(exp_r)+rwi_mat*np.real(exp_r)
 
 	for pulse_counter in range(0,num_pulses):
-		if pulse_counter==0:
-			#[gwcr_data[pulse_counter,:], gwcr_zf]=signal.sosfilt(sos_coefs, gwcr_data[pulse_counter,:], zi=sos_zi)
-			#[gwci_data[pulse_counter,:], gwci_zf]=signal.sosfilt(sos_coefs, gwci_data[pulse_counter,:], zi=sos_zi)
-
-			[rwcr_data[pulse_counter,:], rwcr_zf]=signal.sosfilt(sos_coefs, rwcr_data[pulse_counter,:], zi=sos_zi)
-			[rwci_data[pulse_counter,:], rwci_zf]=signal.sosfilt(sos_coefs, rwci_data[pulse_counter,:], zi=sos_zi)
-
-		else:
-			#[gwcr_data[pulse_counter,:], gwcr_zf]=signal.sosfilt(sos_coefs, gwcr_data[pulse_counter,:], zi=gwcr_zf)
-			#[gwci_data[pulse_counter,:], gwci_zf]=signal.sosfilt(sos_coefs, gwci_data[pulse_counter,:], zi=gwci_zf)
-
-			[rwcr_data[pulse_counter,:], rwcr_zf]=signal.sosfilt(sos_coefs, rwcr_data[pulse_counter,:], zi=rwcr_zf)
-			[rwci_data[pulse_counter,:], rwci_zf]=signal.sosfilt(sos_coefs, rwci_data[pulse_counter,:], zi=rwci_zf)
-
-		#temp1=gwcr_data[pulse_counter,:]
-		#temp1=temp1[::-1]
-		#gwcr_data[pulse_counter,:]=temp1
-		#temp2=gwci_data[pulse_counter,:]
-		#temp2=temp2[::-1]
-		#gwci_data[pulse_counter,:]=temp2
-
-		temp3=rwcr_data[pulse_counter,:]
-		temp3=temp3[::-1]
-		rwcr_data[pulse_counter,:]=temp3
-		temp4=rwci_data[pulse_counter,:]
-		temp4=temp4[::-1]
-		rwci_data[pulse_counter,:]=temp4
 
 		#[gwcr_data[pulse_counter,:], gwcr_zf]=signal.sosfilt(sos_coefs, gwcr_data[pulse_counter,:], zi=gwcr_zf)
 		#[gwci_data[pulse_counter,:], gwci_zf]=signal.sosfilt(sos_coefs, gwci_data[pulse_counter,:], zi=gwci_zf)
@@ -172,19 +150,11 @@ for w_ind in range(0,len(w_axe)):
 		[rwcr_data[pulse_counter,:], rwcr_zf]=signal.sosfilt(sos_coefs, rwcr_data[pulse_counter,:], zi=rwcr_zf)
 		[rwci_data[pulse_counter,:], rwci_zf]=signal.sosfilt(sos_coefs, rwci_data[pulse_counter,:], zi=rwci_zf)
 
-		#temp1=gwcr_data[pulse_counter,:]
-		#temp1=temp1[::-1]
-		#gwcr_data[pulse_counter,:]=temp1
-		#temp2=gwci_data[pulse_counter,:]
-		#temp2=temp2[::-1]
-		#gwci_data[pulse_counter,:]=temp2
+		#[gwcr_data[pulse_counter,:], gwcr_zf]=signal.sosfilt(sos_coefs, gwcr_data[pulse_counter,:][::-1], zi=gwcr_zf)
+		#[gwci_data[pulse_counter,:], gwci_zf]=signal.sosfilt(sos_coefs, gwci_data[pulse_counter,:][::-1], zi=gwci_zf)
 
-		temp3=rwcr_data[pulse_counter,:]
-		temp3=temp3[::-1]
-		rwcr_data[pulse_counter,:]=temp3
-		temp4=rwci_data[pulse_counter,:]
-		temp4=temp4[::-1]
-		rwci_data[pulse_counter,:]=temp4
+		[rwcr_data[pulse_counter,:], rwcr_zf]=signal.sosfilt(sos_coefs, rwcr_data[pulse_counter,:][::-1], zi=rwcr_zf)
+		[rwci_data[pulse_counter,:], rwci_zf]=signal.sosfilt(sos_coefs, rwci_data[pulse_counter,:][::-1], zi=rwci_zf)
 
 	# the second data parsing block
 
@@ -238,7 +208,7 @@ np.savetxt(
 	header=head_z)
 elapsed4 = time.time()-elapsed3-t
 print("End Saving State")
-print(elapsed3)
+print(elapsed4)
 
 
 elapsed = time.time() - t
