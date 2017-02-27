@@ -147,10 +147,14 @@ print("Data processing (loop over frequencies):")
 sos_coefs = signal.iirfilter(f_order, (2**.5)*2*l_c_freq/fd, btype='lowpass', analog=False, ftype='bessel', output='sos')
 
 for pulse_counter in range(0,num_pulses):
-    EXP_C=np.exp(-1j*w_axe[:,np.newaxis]*rw_ind_mat[pulse_counter,:])
-    EXP_R=np.real(EXP_C)
-    EXP_I=np.imag(EXP_C)
-    
+    #EXP_C=np.exp(-1j*w_axe[:,np.newaxis]*rw_ind_mat[pulse_counter,:])
+    #EXP_R=np.real(EXP_C)
+    #EXP_I=np.imag(EXP_C)
+
+    Exp_arg=w_axe[:,np.newaxis]*rw_ind_mat[pulse_counter,:]
+    EXP_R=np.cos(Exp_arg)
+    EXP_I=-np.sin(Exp_arg)
+
     RWR_MAT=rwr_mat[pulse_counter,:][np.newaxis,:]
     RWI_MAT=rwi_mat[pulse_counter,:][np.newaxis,:]
     
@@ -159,7 +163,7 @@ for pulse_counter in range(0,num_pulses):
         
     for w_ind in range(0,len(w_axe)):
         #exp_g=np.exp(-1j*w_axe[w_ind]*gw_ind_mat[pulse_counter,:])
-        exp_r=np.exp(-1j*w_axe[w_ind]*rw_ind_mat[pulse_counter,:])
+        #exp_r=np.exp(-1j*w_axe[w_ind]*rw_ind_mat[pulse_counter,:])
     
         #gwcr_data=gwr_mat[pulse_counter,:]*np.real(exp_g)-gwi_mat[pulse_counter,:]*np.imag(exp_g)
         #gwci_data=gwr_mat[pulse_counter,:]*np.imag(exp_g)+gwi_mat[pulse_counter,:]*np.real(exp_g)
@@ -216,10 +220,10 @@ for pulse_counter in range(0,num_pulses):
             doppler_shifts[:,pulse_counter-1]=(rw_pha_mat[:,pulse_counter]-rw_pha_mat[:,pulse_counter-1])/2/np.pi/(period/fd)        
 
     #if pulse_counter%10==0 or pulse_counter==num_pulses-1:
-    if pulse_counter==num_pulses-1:
-        im.remove()
-        im=plt.pcolormesh(x_axe, y_axe, doppler_shifts,vmin=vmin, vmax=vmax)
-        plt.savefig(fig_filename)
+    #if pulse_counter==num_pulses-1:
+        #im.remove()
+        #im=plt.pcolormesh(x_axe, y_axe, doppler_shifts,vmin=vmin, vmax=vmax)
+        #plt.savefig(fig_filename)
     #print(str(w_ind+1)+"/"+str(len(w_axe)))
     sys.stdout.write("\r"+str(pulse_counter+1)+"/"+str(num_pulses)) # The simpliest...
     sys.stdout.flush()                                      # progressbar
@@ -237,7 +241,11 @@ print(elapsed3)
 #mdict['t_axe']=np.arange(period/fd,period/fd*(num_pulses+1),period/fd)
 #io.savemat(mat_filename,mdict)
 
-doppler_shifts=np.diff(rw_pha_mat)/2/np.pi/(period/fd)
+#doppler_shifts=np.diff(rw_pha_mat)/2/np.pi/(period/fd)
+
+im.remove()
+im=plt.pcolormesh(x_axe, y_axe, doppler_shifts,vmin=vmin, vmax=vmax)
+plt.savefig(fig_filename)
 
 head_z="nx " + str(num_pulses-1) + " ny " + str(len(w_axe)) + " xmin " + str(period/fd) + " xmax " + str(num_pulses*period/fd) + " ymin " + str((f_min+f_center)/1000) + " ymax " + str((f_min+f_center)/1000+f_bandwidth/1000)
 np.savetxt(
