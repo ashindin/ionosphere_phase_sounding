@@ -32,9 +32,8 @@ def get_raw_data_from_file(fname,offset_samples,duration_samples, file_parameter
 		
 	return data_raw
 
-
-t = time.time()
 # Input parameters
+t = time.time()
 wv_filename="04061417_part01.wv"
 bin_filename="04061417.bin"
 fig_filename="doppler_shifts_mpl.png"
@@ -64,7 +63,6 @@ vmax=0.9
 # -------------------
 
 # Arrray initializations
-
 w_axe1=np.arange(f_min+fd,fd,f_step)*2*np.pi/fd
 w_axe2=np.arange(0,-f_min+f_step,f_step)*2*np.pi/fd
 w_axe=np.concatenate((w_axe1,w_axe2), axis=0)
@@ -84,11 +82,6 @@ doppler_shifts=np.zeros((len(w_axe),num_pulses-1))
 
 #until_par="--until=+" + str(win)
 unpack_str="<"+str(n_ch*win)+"h"
-
-#gwcr_zf=np.zeros((2,2))
-#gwci_zf=np.zeros((2,2))
-rwcr_zf=np.zeros((2,2))
-rwci_zf=np.zeros((2,2))
 
 elapsed1 = time.time() - t
 print("End Preparing State")
@@ -156,6 +149,10 @@ for w_ind in range(0,len(w_axe)):
 
 	rwcr_data=rwr_mat*np.real(exp_r)-rwi_mat*np.imag(exp_r)
 	rwci_data=rwr_mat*np.imag(exp_r)+rwi_mat*np.real(exp_r)
+	#gwcr_zf=np.zeros((2,2))
+	#gwci_zf=np.zeros((2,2))
+	rwcr_zf=np.zeros((2,2))
+	rwci_zf=np.zeros((2,2))
 
 	for pulse_counter in range(0,num_pulses):
 
