@@ -84,8 +84,8 @@ unpack_str="<"+str(n_ch*win)+"h"
 
 #gwcr_zf=np.zeros((2,2))
 #gwci_zf=np.zeros((2,2))
-rwcr_zf=np.zeros((2,2))
-rwci_zf=np.zeros((2,2))
+#rwcr_zf=np.zeros((2,2))
+#rwci_zf=np.zeros((2,2))
 
 rwcr_zf_list=[np.zeros((2,2)) for i in range(len(w_axe))]
 rwci_zf_list=[np.zeros((2,2)) for i in range(len(w_axe))]
@@ -147,7 +147,16 @@ print("Data processing (loop over frequencies):")
 sos_coefs = signal.iirfilter(f_order, (2**.5)*2*l_c_freq/fd, btype='lowpass', analog=False, ftype='bessel', output='sos')
 
 for pulse_counter in range(0,num_pulses):
-            
+    EXP_C=np.exp(-1j*w_axe[:,np.newaxis]*rw_ind_mat[pulse_counter,:])
+    EXP_R=np.real(EXP_C)
+    EXP_I=np.imag(EXP_C)
+    
+    RWR_MAT=rwr_mat[pulse_counter,:][np.newaxis,:]
+    RWI_MAT=rwi_mat[pulse_counter,:][np.newaxis,:]
+    
+    RWCR_DATA=RWR_MAT*EXP_R-RWI_MAT*EXP_I
+    RWCI_DATA=RWR_MAT*EXP_I+RWI_MAT*EXP_R
+        
     for w_ind in range(0,len(w_axe)):
         #exp_g=np.exp(-1j*w_axe[w_ind]*gw_ind_mat[pulse_counter,:])
         exp_r=np.exp(-1j*w_axe[w_ind]*rw_ind_mat[pulse_counter,:])
@@ -155,47 +164,59 @@ for pulse_counter in range(0,num_pulses):
         #gwcr_data=gwr_mat[pulse_counter,:]*np.real(exp_g)-gwi_mat[pulse_counter,:]*np.imag(exp_g)
         #gwci_data=gwr_mat[pulse_counter,:]*np.imag(exp_g)+gwi_mat[pulse_counter,:]*np.real(exp_g)
 
-        rwcr_data=rwr_mat[pulse_counter,:]*np.real(exp_r)-rwi_mat[pulse_counter,:]*np.imag(exp_r)
-        rwci_data=rwr_mat[pulse_counter,:]*np.imag(exp_r)+rwi_mat[pulse_counter,:]*np.real(exp_r)
-
-    
+        #rwcr_data=rwr_mat[pulse_counter,:]*np.real(exp_r)-rwi_mat[pulse_counter,:]*np.imag(exp_r)
+        #rwci_data=rwr_mat[pulse_counter,:]*np.imag(exp_r)+rwi_mat[pulse_counter,:]*np.real(exp_r)  
 
         #[gwcr_data[pulse_counter,:], gwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, gwcr_data[pulse_counter,:], zi=gwcr_zf_list[w_ind])
         #[gwci_data[pulse_counter,:], gwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, gwci_data[pulse_counter,:], zi=gwci_zf_list[w_ind])
 
-        [rwcr_data, rwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, rwcr_data, zi=rwcr_zf_list[w_ind])
-        [rwci_data, rwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, rwci_data, zi=rwci_zf_list[w_ind])
+        #[rwcr_data, rwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, rwcr_data, zi=rwcr_zf_list[w_ind])
+        #[rwci_data, rwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, rwci_data, zi=rwci_zf_list[w_ind])
 
+        [RWCR_DATA[w_ind,:], rwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, RWCR_DATA[w_ind,:], zi=rwcr_zf_list[w_ind])
+        [RWCI_DATA[w_ind,:], rwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, RWCI_DATA[w_ind,:], zi=rwci_zf_list[w_ind])
+        
         #[gwcr_data[pulse_counter,:], gwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, gwcr_data[pulse_counter,:][::-1], zi=gwcr_zf_list[w_ind])
         #[gwci_data[pulse_counter,:], gwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, gwci_data[pulse_counter,:][::-1], zi=gwci_zf_list[w_ind])
 
-        [rwcr_data, rwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, rwcr_data[::-1], zi=rwcr_zf_list[w_ind])
-        [rwci_data, rwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, rwci_data[::-1], zi=rwci_zf_list[w_ind])
+        #[rwcr_data, rwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, rwcr_data[::-1], zi=rwcr_zf_list[w_ind])
+        #[rwci_data, rwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, rwci_data[::-1], zi=rwci_zf_list[w_ind])
 
+        [RWCR_DATA[w_ind,:], rwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, RWCR_DATA[w_ind,:][::-1], zi=rwcr_zf_list[w_ind])
+        [RWCI_DATA[w_ind,:], rwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, RWCI_DATA[w_ind,:][::-1], zi=rwci_zf_list[w_ind])
+        
         # the second data parsing block
 
         #gwc_data[pulse_counter,:]= gwcr_data[pulse_counter,:] + gwci_data[pulse_counter,:]*1j
-        rwc_data= rwcr_data + rwci_data*1j
+        #rwc_data= rwcr_data + rwci_data*1j
 
         #gwp_data[pulse_counter,:]=np.angle(gwc_data[pulse_counter,:])
         #gwa_data[pulse_counter,:]=np.absolute(gwc_data[pulse_counter,:])
 
-        rwp_data=np.angle(rwc_data)
+        #rwp_data=np.angle(rwc_data)
         #rwa_data[pulse_counter,:]=np.absolute(rwc_data[pulse_counter,:])
 
 
         #gwp_data[pulse_counter,:]=np.unwrap(gwp_data[pulse_counter,:])
-        rwp_data=np.unwrap(rwp_data)
+        #rwp_data=np.unwrap(rwp_data)
 
         #gw_amp_mat[w_ind,pulse_counter]=np.mean(gwa_data)
         #gw_pha_mat[w_ind,pulse_counter]=np.mean(gwp_data)
 
         #rw_amp_mat[w_ind,pulse_counter]=np.mean(rwa_data)   
-        rw_pha_mat[w_ind,pulse_counter]=np.mean(rwp_data)
+        #rw_pha_mat[w_ind,pulse_counter]=np.mean(rwp_data)
 
-        if pulse_counter>0:
-            doppler_shifts[w_ind,pulse_counter-1]=(rw_pha_mat[w_ind,pulse_counter]-rw_pha_mat[w_ind,pulse_counter-1])/2/np.pi/(period/fd)
-    if pulse_counter%10==0 or pulse_counter==num_pulses-1:
+        #if pulse_counter>0:
+            #doppler_shifts[w_ind,pulse_counter-1]=(rw_pha_mat[w_ind,pulse_counter]-rw_pha_mat[w_ind,pulse_counter-1])/2/np.pi/(period/fd)
+
+    RWP_DATA=np.arctan2(RWCI_DATA,RWCR_DATA)
+    RWP_DATA=np.unwrap(RWP_DATA)    
+    rw_pha_mat[:,pulse_counter]=np.mean(RWP_DATA,axis=1)
+    if pulse_counter>0:
+            doppler_shifts[:,pulse_counter-1]=(rw_pha_mat[:,pulse_counter]-rw_pha_mat[:,pulse_counter-1])/2/np.pi/(period/fd)        
+
+    #if pulse_counter%10==0 or pulse_counter==num_pulses-1:
+    if pulse_counter==num_pulses-1:
         im.remove()
         im=plt.pcolormesh(x_axe, y_axe, doppler_shifts,vmin=vmin, vmax=vmax)
         plt.savefig(fig_filename)
@@ -208,12 +229,6 @@ sys.stdout.write("\nComplete!\n")
 elapsed3 = time.time()-elapsed2-t
 print("End Processing State")
 print(elapsed3)
-
-rw_pha_mat[0:2,:].shape
-
-np.diff(rw_pha_mat[0,:]).shape
-
-rw_pha_mat[1,:]
 
 # Saving result
 #mdict={}
