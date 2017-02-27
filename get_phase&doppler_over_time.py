@@ -143,7 +143,7 @@ ax.set_xticks([0, 30,60,90,120,150,180,210,240,270,300,330])
 plt.savefig(fig_filename)
 
 # Processing Block
-print("Data processing (loop over frequencies):")
+print("Data processing (loop over pulses/time):")
 sos_coefs = signal.iirfilter(f_order, (2**.5)*2*l_c_freq/fd, btype='lowpass', analog=False, ftype='bessel', output='sos')
 
 for pulse_counter in range(0,num_pulses):
