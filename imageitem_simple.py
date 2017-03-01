@@ -9,6 +9,7 @@ import pyqtgraph as pg
 import pyqtgraph.ptime as ptime
 import cubehelix
 import jet
+import viridis
 
 app = QtGui.QApplication([])
 
@@ -28,9 +29,8 @@ view.addItem(img)
 #img.setLookupTable(lut_cubehelix)
 
 ## Set initial view bounds
-#view.setRange(QtCore.QRectF(0, 0, 600, 600))
-im_width=425
-im_height=330
+im_width=660
+im_height=425
 view.setRange(QtCore.QRectF(0, 0, im_width, im_height))
 
 ## Create random image
@@ -55,7 +55,8 @@ def updateData():
     ## Display the data
     #img.setImage(data[i],autoLevels=False, levels=[-0.2, 0.9], lut=cubehelix.cubehelix())
     #img.setImage(np.roll(data,i,axis=0),autoLevels=False, levels=[-0.2, 0.9], lut=cubehelix.cubehelix())
-    img.setImage(np.roll(data,i,axis=0),autoLevels=False, levels=[-0.2, 0.9], lut=jet.jet())
+    #img.setImage(np.roll(data,i,axis=0),autoLevels=False, levels=[-0.2, 0.9], lut=jet.jet())
+    img.setImage(np.roll(data,i,axis=0),autoLevels=False, levels=[-0.2, 0.9], lut=viridis.viridis())
 
     i = (i+1) % im_width
 
