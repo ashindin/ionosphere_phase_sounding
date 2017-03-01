@@ -190,8 +190,8 @@ for pulse_counter in range(0,num_pulses):
 
         [RWCR_DATA[w_ind,:], rwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, RWCR_DATA[w_ind,:], zi=rwcr_zf_list[w_ind])
         [RWCI_DATA[w_ind,:], rwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, RWCI_DATA[w_ind,:], zi=rwci_zf_list[w_ind])
-        [RWCR_DATA[w_ind,:], rwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, RWCR_DATA[w_ind,:][::-1], zi=rwcr_zf_list[w_ind])
-        [RWCI_DATA[w_ind,:], rwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, RWCI_DATA[w_ind,:][::-1], zi=rwci_zf_list[w_ind])
+        #[RWCR_DATA[w_ind,:], rwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, RWCR_DATA[w_ind,:][::-1], zi=rwcr_zf_list[w_ind])
+        #[RWCI_DATA[w_ind,:], rwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, RWCI_DATA[w_ind,:][::-1], zi=rwci_zf_list[w_ind])
 
         #[GWCR_DATA[w_ind,:], gwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, GWCR_DATA[w_ind,:], zi=gwcr_zf_list[w_ind])
         #[GWCI_DATA[w_ind,:], gwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, GWCI_DATA[w_ind,:], zi=gwci_zf_list[w_ind])

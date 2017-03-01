@@ -36,7 +36,7 @@ def get_raw_data_from_file(fname,offset_samples,duration_samples, file_parameter
 t = time.time()
 wv_filename="04061417_part01.wv"
 bin_filename="04061417.bin"
-fig_filename="doppler_shifts_mpl.png"
+fig_filename="doppler_shifts_freqs1.png"
 file_parameters=(1000000,16,2)
 data_filename=bin_filename
 z_filename= "doppler_shifts.z"
@@ -162,6 +162,7 @@ for w_ind in range(0,len(w_axe)):
 		[rwcr_data[pulse_counter,:], rwcr_zf]=signal.sosfilt(sos_coefs, rwcr_data[pulse_counter,:], zi=rwcr_zf)
 		[rwci_data[pulse_counter,:], rwci_zf]=signal.sosfilt(sos_coefs, rwci_data[pulse_counter,:], zi=rwci_zf)
 
+	for pulse_counter in range(num_pulses-1,-1,-1):
 		#[gwcr_data[pulse_counter,:], gwcr_zf]=signal.sosfilt(sos_coefs, gwcr_data[pulse_counter,:][::-1], zi=gwcr_zf)
 		#[gwci_data[pulse_counter,:], gwci_zf]=signal.sosfilt(sos_coefs, gwci_data[pulse_counter,:][::-1], zi=gwci_zf)
 
