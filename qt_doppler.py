@@ -4,8 +4,16 @@ import struct
 import subprocess
 import numpy as np
 from scipy import signal
+
+import PyQt5
+from pyqtgraph.Qt import QtCore, QtGui
+import pyqtgraph as pg
+import pyqtgraph.ptime as ptime
+import cubehelix
+import jet
+import viridis
+
 import matplotlib.pyplot as plt
-#from scipy import io
 
 def get_raw_data_from_file(fname,offset_samples,duration_samples, file_parameters=(125000,16,3)):
     if fname[-3::]=='.wv':
@@ -36,7 +44,7 @@ def get_raw_data_from_file(fname,offset_samples,duration_samples, file_parameter
 t = time.time()
 wv_filename="04061417_part01.wv"
 bin_filename="04061417.bin"
-fig_filename="doppler_shifts_mpl2.png"
+fig_filename="doppler_shifts_mpl.png"
 file_parameters=(1000000,16,2)
 data_filename=bin_filename
 z_filename= "doppler_shifts.z"
@@ -63,6 +71,7 @@ vmax=0.9
 
 # Arrray initializations
 w_axe1=np.arange(f_min+fd,fd,f_step)*2*np.pi/fd
+#w_axe2=np.arange(0,-f_min+f_step,f_step)*2*np.pi/fd
 w_axe2=np.arange(0,-f_min,f_step)*2*np.pi/fd
 w_axe=np.concatenate((w_axe1,w_axe2), axis=0)
 
@@ -127,6 +136,24 @@ elapsed2 = time.time()-elapsed1-t
 print("End Filling (DATA loading) State")
 print(elapsed2)
 
+app = QtGui.QApplication([])
+## Create window with GraphicsView widget
+win = pg.GraphicsLayoutWidget()
+win.show()  ## show widget alone in its own window
+win.setWindowTitle('pyqtgraph example: ImageItem')
+view = win.addViewBox()
+## lock the aspect ratio so pixels are always square
+view.setAspectLocked(True)
+## Create image item
+img = pg.ImageItem(border='w')
+view.addItem(img)
+#img.setLookupTable(lut_cubehelix)
+## Set initial view bounds
+im_width=660
+im_height=425
+view.setRange(QtCore.QRectF(0, 0, im_width, im_height))
+doppler_shifts_plot=np.zeros((int(num_pulses/5),int(len(w_axe)/2)))
+
 # Intermediate arrays
 Exp_R_arg=np.zeros((len(w_axe),win2))
 EXP_R_r=np.zeros((len(w_axe),win2))
@@ -150,6 +177,23 @@ RWP_DATA=np.zeros((len(w_axe),win2))
 RWP_DATA= np.zeros((len(w_axe),win2))
 #GWP_DATA=np.zeros((len(w_axe),win2))
 #GWP_DATA= np.zeros((len(w_axe),win2))
+
+def updateData():
+    global img, doppler_shifts_plot
+
+    #img.setImage(doppler_shifts_plot,autoLevels=False, levels=[-0.2, 0.9], lut=viridis.viridis())
+    img.setImage(doppler_shifts_plot,autoLevels=False, levels=[-0.2, 0.9], lut=jet.jet())
+
+    #i = (i+1) % im_width
+
+    QtCore.QTimer.singleShot(1, updateData)
+    #now = ptime.time()
+    #fps2 = 1.0 / (now-updateTime)
+    #updateTime = now
+    #fps = fps * 0.9 + fps2 * 0.1
+    
+    #print(int(fps))
+QtGui.QApplication.processEvents()
 
 # Processing Block
 print("Data processing (loop over pulses/time):")
@@ -193,9 +237,18 @@ for pulse_counter in range(0,num_pulses):
     #GWP_DATA=np.unwrap(GWP_DATA)    
     #gw_pha_mat[:,pulse_counter]=np.mean(GWP_DATA,axis=1)
     if pulse_counter>0:
-            doppler_shifts[:,pulse_counter-1]=(rw_pha_mat[:,pulse_counter]-rw_pha_mat[:,pulse_counter-1])/2/np.pi/(period/fd)        
+        doppler_shifts[:,pulse_counter-1]=(rw_pha_mat[:,pulse_counter]-rw_pha_mat[:,pulse_counter-1])/2/np.pi/(period/fd)        
 
-    #if pulse_counter%10==0 or pulse_counter==num_pulses-1:
+    if pulse_counter>1:
+        if (pulse_counter)%5==0 or pulse_counter==num_pulses-1:
+            doppler_shifts_plot[int((pulse_counter)/5)-1,:]=doppler_shifts[0::2,pulse_counter-1].T
+            #doppler_shifts_plot[int((pulse_counter-1)/5)-1,:]=signal.decimate(doppler_shifts[:,pulse_counter-1], 2, ftype='fir', axis=0, zero_phase=False).T
+            #temp=doppler_shifts[:,pulse_counter-5:pulse_counter]
+            #temp=np.mean(temp,axis=1)
+            #temp=np.reshape(temp,(2,425))            
+            #doppler_shifts_plot[int((pulse_counter)/5)-1,:]=np.mean(temp,axis=0)
+            updateData()
+            QtGui.QApplication.processEvents()
     #if pulse_counter==num_pulses-1:
         #im.remove()
         #im=plt.pcolormesh(x_axe, y_axe, doppler_shifts,vmin=vmin, vmax=vmax)
@@ -208,6 +261,19 @@ elapsed3 = time.time()-elapsed2-t
 print("End Processing State")
 print(elapsed3)
 
+# Figure preparing
+x_axe=np.arange(0.0,doppler_shifts.shape[1]*period/fd,0.1)
+y_axe=np.arange((f_center+f_min)/1000,(f_center+f_min)/1000+len(w_axe),f_step/1000)
+fig=plt.figure(figsize=(12,8))
+ax=plt.axes()
+im=plt.pcolormesh(x_axe, y_axe, doppler_shifts,vmin=-0.2, vmax=0.9,  cmap='jet')
+plt.colorbar()
+ax.set_xlim(x_axe[0],x_axe[-1])
+ax.set_ylim(y_axe[0],y_axe[-1])
+ax.set_xticks([0, 30,60,90,120,150,180,210,240,270,300,330])
+plt.savefig(fig_filename)
+plt.close()
+
 # Saving result
 #mdict={}
 #mdict['Phi']=rw_pha_mat
@@ -216,18 +282,6 @@ print(elapsed3)
 #io.savemat(mat_filename,mdict)
 
 #doppler_shifts=np.diff(rw_pha_mat)/2/np.pi/(period/fd)
-
-# Figure preparing
-x_axe=np.arange(0.0,doppler_shifts.shape[1]*period/fd,0.1)
-y_axe=np.arange((f_center+f_min)/1000,(f_center+f_min)/1000+len(w_axe),f_step/1000)
-fig=plt.figure(figsize=(12,8))
-ax=plt.axes()
-im=plt.pcolormesh(x_axe, y_axe, doppler_shifts,vmin=-0.2, vmax=0.9)
-plt.colorbar()
-ax.set_xlim(x_axe[0],x_axe[-1])
-ax.set_ylim(y_axe[0],y_axe[-1])
-ax.set_xticks([0, 30,60,90,120,150,180,210,240,270,300,330])
-plt.savefig(fig_filename)
 
 head_z="nx " + str(num_pulses-1) + " ny " + str(len(w_axe)) + " xmin " + str(period/fd) + " xmax " + str(num_pulses*period/fd) + " ymin " + str((f_min+f_center)/1000) + " ymax " + str((f_min+f_center)/1000+f_bandwidth/1000)
 np.savetxt(
@@ -246,3 +300,8 @@ print(elapsed4)
 elapsed = time.time() - t
 print("Total time")
 print(elapsed)
+
+if __name__ == '__main__':
+    import sys
+    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+        QtGui.QApplication.instance().exec_()
