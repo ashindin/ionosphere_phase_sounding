@@ -80,7 +80,8 @@ results):
      
         RWP_DATA=np.arctan2(RWCI_DATA,RWCR_DATA)
         RWP_DATA=np.unwrap(RWP_DATA)    
-        rw_pha_mat[:,pulse_counter]=np.mean(RWP_DATA,axis=1)
+        #rw_pha_mat[:,pulse_counter]=np.mean(RWP_DATA,axis=1)
+        rw_pha_mat[:,pulse_counter]=RWP_DATA[:,499]
 
         if pulse_counter>0:
                 doppler_shifts[:,pulse_counter-1]=(rw_pha_mat[:,pulse_counter]-rw_pha_mat[:,pulse_counter-1])/2/np.pi/(period/fd)        
@@ -242,7 +243,7 @@ if __name__ == '__main__':
             #print(pulse_counter, [e.is_set() for e in e_w])
             if all([e.is_set() for e in e_w]): break # ждем пока ВСЕ вёкеры обработают импульс        
             
-
+        
         # сбор результатов
         #print(pulse_counter, results.qsize())
         if pulse_counter>0:
