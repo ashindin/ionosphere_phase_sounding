@@ -44,8 +44,12 @@ def get_raw_data_from_file(fname,offset_samples,duration_samples, file_parameter
 def worker_process(ind,e1,e_w,
 sos_coefs, win2, num_pulses, period, fd,
 rwr_mat,rwi_mat,rw_ind_mat,
-w_axe,rwcr_zf_list,rwci_zf_list,
+w_axe,#rwcr_zf_list,rwci_zf_list,
 results):
+    #rwcr_zf_list=[np.zeros((2,2)) for i in range(len(w_axe))]
+    #rwci_zf_list=[np.zeros((2,2)) for i in range(len(w_axe))]
+    rwcr_zf_list=np.zeros((2,len(w_axe),2))
+    rwci_zf_list=np.zeros((2,len(w_axe),2))
     
     rw_pha_mat=np.zeros((len(w_axe),num_pulses))
     doppler_shifts=np.zeros((len(w_axe),num_pulses-1))
@@ -73,10 +77,10 @@ results):
         RWCR_DATA=RWR_MAT*EXP_R_r-RWI_MAT*EXP_R_i
         RWCI_DATA=RWR_MAT*EXP_R_i+RWI_MAT*EXP_R_r    
             
-        for w_ind in range(0,len(w_axe)):
+        #for w_ind in range(0,len(w_axe)):
     
-            [RWCR_DATA[w_ind,:], rwcr_zf_list[w_ind]]=signal.sosfilt(sos_coefs, RWCR_DATA[w_ind,:], zi=rwcr_zf_list[w_ind])
-            [RWCI_DATA[w_ind,:], rwci_zf_list[w_ind]]=signal.sosfilt(sos_coefs, RWCI_DATA[w_ind,:], zi=rwci_zf_list[w_ind])
+        RWCR_DATA, rwcr_zf_list=signal.sosfilt(sos_coefs, RWCR_DATA, zi=rwcr_zf_list)
+        RWCI_DATA, rwci_zf_list=signal.sosfilt(sos_coefs, RWCI_DATA, zi=rwci_zf_list)
      
         RWP_DATA=np.arctan2(RWCI_DATA,RWCR_DATA)
         RWP_DATA=np.unwrap(RWP_DATA)    
@@ -96,7 +100,7 @@ if __name__ == '__main__':
     t = time.time()
     wv_filename="04061417_part01.wv"
     bin_filename="04061417.bin"
-    fig_filename="doppler_shifts_mpl_mp2.png"
+    fig_filename="doppler_shifts_mpl_mp.png"
     file_parameters=(1000000,16,2)
     data_filename=bin_filename
     z_filename= "doppler_shifts.z"
@@ -136,8 +140,8 @@ if __name__ == '__main__':
     
     unpack_str="<"+str(n_ch*win)+"h"
     
-    rwcr_zf_list=[np.zeros((2,2)) for i in range(len(w_axe))]
-    rwci_zf_list=[np.zeros((2,2)) for i in range(len(w_axe))]
+    #~ rwcr_zf_list=[np.zeros((2,2)) for i in range(len(w_axe))]
+    #~ rwci_zf_list=[np.zeros((2,2)) for i in range(len(w_axe))]
 
     
     
@@ -198,7 +202,7 @@ if __name__ == '__main__':
                                  sos_coefs, win2, num_pulses, period, fd,
                                  rwr_mat, rwi_mat, rw_ind_mat, 
                                  w_axe[ch_id[i][0]:ch_id[i][1]],
-                                 rwcr_zf_list[ch_id[i][0]:ch_id[i][1]], rwci_zf_list[ch_id[i][0]:ch_id[i][1]],
+                                 #rwcr_zf_list[ch_id[i][0]:ch_id[i][1]], rwci_zf_list[ch_id[i][0]:ch_id[i][1]],
                                  results
                                  )))
         w[i].start() 
