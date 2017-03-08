@@ -84,8 +84,9 @@ results):
      
         RWP_DATA=np.arctan2(RWCI_DATA,RWCR_DATA)
         RWP_DATA=np.unwrap(RWP_DATA)    
-        #rw_pha_mat[:,pulse_counter]=np.mean(RWP_DATA,axis=1)
-        rw_pha_mat[:,pulse_counter]=RWP_DATA[:,499]
+        #~ rw_pha_mat[:,pulse_counter]=np.max(RWP_DATA,axis=1)
+        rw_pha_mat[:,pulse_counter]=np.mean(RWP_DATA,axis=1)
+        #~ rw_pha_mat[:,pulse_counter]=RWP_DATA[:,499]
 
         if pulse_counter>0:
                 doppler_shifts[:,pulse_counter-1]=(rw_pha_mat[:,pulse_counter]-rw_pha_mat[:,pulse_counter-1])/2/np.pi/(period/fd)        
@@ -115,13 +116,17 @@ if __name__ == '__main__':
     f_center=5400000
     f_step=1000 # frequency step (Hz)
     l_c_freq=100 # low cutoff frequency (Hz)
+    #~ l_c_freq=500 # low cutoff frequency (Hz)
     f_order=3 # filter order
     period=period_sec*fd
     #scale_factor=0.5/32768
     scale_factor=0.5/32767
+    #~ win=4000 # window size in samples
+    #~ win2=1000 # window2 size in samples
     win=4000 # window size in samples
-    win2=1000 # window2 size in samples
-    del_rw=2550 # delay of the reflected signal in samples
+    win2=600 # window2 size in samples
+    #~ del_rw=2550 # delay of the reflected signal in samples
+    del_rw=2550+200 # delay of the reflected signal in samples
     vmin=-0.2
     vmax=0.9
 
@@ -166,6 +171,8 @@ if __name__ == '__main__':
         
         rwr_mat[pulse_counter,:]=rwOr_data+rwXi_data
         rwi_mat[pulse_counter,:]=rwOi_data-rwXr_data
+        #~ rwr_mat[pulse_counter,:]=rwOr_data
+        #~ rwi_mat[pulse_counter,:]=rwOi_data
 
         rw_ind_mat[pulse_counter,:]=ind_axe_all[del_rw:(del_rw+win2)]
     elapsed2 = time.time()-elapsed1-t
